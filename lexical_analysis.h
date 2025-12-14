@@ -3,12 +3,7 @@
 
 #include "read_from_file_funcs.h"
 
-const int NUM_OF_KEYWORDS = 9;
-
-const int NUM_OF_OPERATORS = 11;
-
 const int DEFAULT_TOKEN_ARR_SIZE = 100;
-
 const int MAX_LEN_OF_WORD = 100;
 
 enum Status
@@ -19,10 +14,39 @@ enum Status
 
 enum Type
 {
-    KEY,
-    OP,
-    IDENT,
-    NUM,
+    //Kewords
+
+    KEY_IF = 0,
+    KEY_WHILE = 1,
+    KEY_RETURN = 2,
+    KEY_INT = 3,
+    KEY_LPAREN = 4,
+    KEY_RPAREN = 5,
+    KEY_END_OP = 6,
+    KEY_LBRACE = 7,
+    KEY_RBRACE = 8,
+
+    //Operators
+
+    OP_ASSIGNED = 9,
+    OP_EQUAL = 10,
+    OP_BIGGER = 11,
+    OP_LESS = 12,
+    OP_LESS_OR_EQUAL = 13,
+    OP_BIGGER_OR_EQUAL = 14,
+    OP_NOT_EQUAL = 15,
+    OP_MUL = 16,
+    OP_ADD = 17,
+    OP_DIV = 18,
+    OP_SUB = 19,
+    OP_POW = 20,
+    OP_MOD = 21,
+
+    //Identifier
+    IDENT = 22,
+
+    //Number
+    NUM = 23,
 };
 
 struct String
@@ -77,6 +101,6 @@ void AddStringToken(TokenArray* tokens, Buffer* buffer,
 
 void SkipSpaces(Buffer* buffer);
 
-bool IsRussianAlpha(char sym);
+bool IsSymInIdentifierName(char sym);
 
 #endif

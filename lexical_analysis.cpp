@@ -1,35 +1,8 @@
 #include <TXLib.h>
 
 #include "lexical_analysis.h"
+#include "orig_lexicon_of_lang.h"
 #include "hash_funcs.h"
-
-String keywords_arr[NUM_OF_KEYWORDS] =
-{
-{"внатуре",  GetHash("внатуре")},    //if
-{"потрещим", GetHash("потрещим")},  //while
-{"шухер",    GetHash("шухер")},        //return
-{"йопта",    GetHash("йопта")},        //int
-{"гыы",      GetHash("гыы")},          //(
-{"жыы",      GetHash("жыы")},          //(
-{"наx",      GetHash("нах")},          //;
-{"шуры",     GetHash("шуры")},       // {
-{"муры",     GetHash("муры")},       // {
-};
-
-String operator_arr[NUM_OF_OPERATORS] =
-{
-{"=", GetHash("=")},
-{"==", GetHash("==")},
-{"<=", GetHash("<=")},
-{">=", GetHash(">=")},
-{"<",   GetHash("<")},
-{">",   GetHash(">")},
-{"+",   GetHash("+")},
-{"-",    GetHash("-")},
-{"/",    GetHash("/")},
-{"^",    GetHash("^")},
-{"%",    GetHash("%")},
-};
 
 void TokenArrayCtor(TokenArray* tokens)
 {
@@ -126,7 +99,6 @@ Status ParseKeyWord(Buffer* buffer, TokenArray* tokens)
     int len = 0;
 
     sscanf(buffer->data, "%s%n", keyword_name, &len);
-    //printf("NAME: %s\n", keyword_name);
 
     if (len < 0) assert(false);
 
@@ -134,11 +106,13 @@ Status ParseKeyWord(Buffer* buffer, TokenArray* tokens)
 
     for (int i = 0; i < NUM_OF_KEYWORDS; ++i)
     {
+        printf("KEY_WORD: |%s|   MY_KY_WOED: |%s|\n", keywords_arr[i].name,
+                                                      keyword_name);
         if (keywords_arr[i].hash == keyword_hash)
         {
             char* name_ptr = strdup(keyword_name);
 
-            AddStringToken(tokens, buffer, KEY, name_ptr);
+            AddStringToken(tokens, buffer, keywords_arr[i].type, name_ptr);
 
             MoveBufferPointer(buffer, (size_t)len);
 
@@ -171,7 +145,7 @@ Status ParseOperator(Buffer* buffer, TokenArray* tokens)
         {
             char* name_ptr = strdup(operator_name);
 
-            AddStringToken(tokens, buffer, OP, name_ptr);
+            AddStringToken(tokens, buffer, operator_arr[i].type, name_ptr);
 
             MoveBufferPointer(buffer, (size_t)len);
 
@@ -188,18 +162,24 @@ Status ParseIdentifier(Buffer* buffer, TokenArray* tokens)
     assert(buffer->data);
     assert(tokens);
 
+    size_t len = 0;
     char identifier_name[MAX_LEN_OF_WORD] = {};
-    int len = 0;
 
-    sscanf(buffer->data, "%s%n", identifier_name, &len);
+    while(true)
+    {
+        if (   !((len != 0 && isdigit(*buffer->data))
+            || IsSymInIdentifierName(*buffer->data)))
+            break;
 
-    if (len < 0) assert(false);
+        identifier_name[len] = *buffer->data;
+
+        len++;
+        MoveBufferPointer(buffer, 1);
+    }
 
     char* name_ptr = strdup(identifier_name);
 
     AddStringToken(tokens, buffer, IDENT, name_ptr);
-
-    MoveBufferPointer(buffer, (size_t)len);
 
     SkipSpaces(buffer);
     return success;
@@ -283,6 +263,13 @@ void SkipSpaces(Buffer* buffer)
 
         buffer->data += 1;
     }
+}
+
+bool IsSymInIdentifierName(char sym)
+{
+    unsigned char c = (unsigned char)sym;
+    return isalpha(c) || c == '_'
+           || c >= 192 || c == 168 || c == 184;
 }
 
 // bool IsRussianAlpha(char sym)

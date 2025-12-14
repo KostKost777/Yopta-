@@ -26,26 +26,12 @@ void PrintTokenArray(TokenArray* tokens)
     for (size_t i = 0; i < tokens->size; ++i)
     {
         printf("TOKEN[%llu]:\n", i);
-        switch(tokens->arr[i].type)
-        {
-            case KEY:
-                printf("KEY NAME: |%s| ", tokens->arr[i].lexeme.str.name);
-                break;
 
-            case OP:
-                printf("OP NAME: |%s| ", tokens->arr[i].lexeme.str.name);
-                break;
+        if (tokens->arr[i].type == NUM)
+            printf("NUM NAME: |%d| ", tokens->arr[i].lexeme.num);
 
-            case IDENT:
-                printf("IDENT NAME: |%s| ", tokens->arr[i].lexeme.str.name);
-                break;
-
-            case NUM:
-                printf("NUM NAME: |%d| ", tokens->arr[i].lexeme.num);
-                break;
-
-            default: break;
-        }
+        else
+            printf("(%d) NAME: |%s| ", tokens->arr[i].type, tokens->arr[i].lexeme.str.name);
 
         printf(" LINE: %llu COLUMN: %llu",
                                    tokens->arr[i].line,
