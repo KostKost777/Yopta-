@@ -3,6 +3,7 @@
 #include <fcntl.h>
 
 #include "read_from_file_funcs.h"
+#include "dump_funcs.h"
 
 int GetDataFromFile(Buffer* buffer,
                        const char* input_filename)
@@ -21,8 +22,7 @@ int GetDataFromFile(Buffer* buffer,
 
     int size = GetSizeOfFile(input_filename);
 
-    if (size == -1)
-        return 1;
+    assert(size != -1);
 
     BufferCtor(buffer, (size_t)size);
 
@@ -30,7 +30,7 @@ int GetDataFromFile(Buffer* buffer,
 
     if (size == -1)
     {
-        fprintf(stdout, "<h3>Error reading file |%s|</h3>", input_filename);
+        fprintf(log_file, "<h3>Error reading file |%s|</h3>", input_filename);
         close(file_descriptor);
 
         return 1;
@@ -66,7 +66,6 @@ void BufferDtor(Buffer* buffer)
     assert(buffer);
 
     free(buffer->data);
-    buffer->data = NULL;
 
     buffer->line = 0;
     buffer->column = 0;

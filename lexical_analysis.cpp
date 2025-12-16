@@ -31,31 +31,31 @@ void TokenArrayDtor(TokenArray* tokens)
     tokens->size = 0;
 }
 
-Status MakeLexicalAnalysis(Buffer* buffer, TokenArray* tokens)
+Status MakeLexicalAnalysis(Buffer* buffer, size_t* pos, TokenArray* tokens)
 {
     assert(buffer);
     assert(buffer->data);
     assert(tokens);
 
-    while(*buffer->data != '\0')
+    while(buffer->data[*pos] != '\0')
     {
         size_t old_size = buffer->size;
 
         //printf("BUFFER: %s\n", buffer->data);
 
-        if (ParseNumber(buffer, tokens) == success)
+        if (ParseNumber(buffer, pos, tokens) == success)
             continue;
 
-        if (ParseKeyWord(buffer, tokens) == success)
+        if (ParseKeyWord(buffer, pos, tokens) == success)
             continue;
 
-        if (ParseOperator(buffer, tokens)== success)
+        if (ParseOperator(buffer, pos, tokens)== success)
             continue;
 
-        if(ParseIdentifier(buffer, tokens) == success)
+        if(ParseIdentifier(buffer, pos, tokens) == success)
             continue;
 
-        if (old_size == buffer->size && *buffer->data != '\0')
+        if (old_size == buffer->size && buffer->data[*pos] != '\0')
         {
             printf("ERROR on line: %llu on column: %llu\n",
                                               buffer->line,
@@ -63,35 +63,38 @@ Status MakeLexicalAnalysis(Buffer* buffer, TokenArray* tokens)
             return error;
         }
     }
+
+    AddStringToken(tokens, buffer, END, buffer->data);
+
     return success;
 }
 
-Status ParseNumber(Buffer* buffer, TokenArray* tokens)
+Status ParseNumber(Buffer* buffer, size_t* pos, TokenArray* tokens)
 {
     assert(buffer);
     assert(buffer->data);
     assert(tokens);
 
-    int sign = GetSignOfNumber(buffer);
+    int sign = GetSignOfNumber(buffer, pos);
     if (sign == 0) return error;
 
     int num = 0;
 
-    while(isdigit(*buffer->data))
+    while(isdigit(buffer->data[*pos]))
     {
         num *= 10;
-        num += (*buffer->data - '0');
-        MoveBufferPointer(buffer, 1);
+        num += (buffer->data[*pos] - '0');
+        MoveBufferPointer(buffer, pos, 1);
     }
 
-    printf("NUM: %d\n", num);
+    //printf("NUM: %d\n", num);
     AddNumToken(tokens, buffer, NUM, num);
-    SkipSpaces(buffer);
+    SkipSpaces(buffer, pos);
 
     return success;
 }
 
-Status ParseKeyWord(Buffer* buffer, TokenArray* tokens)
+Status ParseKeyWord(Buffer* buffer, size_t* pos, TokenArray* tokens)
 {
     assert(buffer);
     assert(buffer->data);
@@ -108,17 +111,15 @@ Status ParseKeyWord(Buffer* buffer, TokenArray* tokens)
 
     for (int i = 0; i < NUM_OF_KEYWORDS; ++i)
     {
-        printf("KEY_WORD: |%s|   MY_KEY_WORD: |%s|\n", keywords_arr[i].name,
-                                                      keyword_name);
+        // printf("KEY_WORD: |%s|   MY_KEY_WORD: |%s|\n", keywords_arr[i].name,
+        //                                               keyword_name);
         if (keywords_arr[i].hash == keyword_hash)
         {
-            char* name_ptr = strdup(keyword_name);
+            AddStringToken(tokens, buffer, keywords_arr[i].type, keyword_name);
 
-            AddStringToken(tokens, buffer, keywords_arr[i].type, name_ptr);
+            MoveBufferPointer(buffer, pos, (size_t)len);
 
-            MoveBufferPointer(buffer, (size_t)len);
-
-            SkipSpaces(buffer);
+            SkipSpaces(buffer, pos);
             return success;
         }
     }
@@ -126,7 +127,7 @@ Status ParseKeyWord(Buffer* buffer, TokenArray* tokens)
     return error;
 }
 
-Status ParseOperator(Buffer* buffer, TokenArray* tokens)
+Status ParseOperator(Buffer* buffer, size_t* pos, TokenArray* tokens)
 {
     assert(buffer);
     assert(buffer->data);
@@ -145,20 +146,19 @@ Status ParseOperator(Buffer* buffer, TokenArray* tokens)
     {
         if (operator_arr[i].hash == operator_hash)
         {
-            char* name_ptr = strdup(operator_name);
+            AddStringToken(tokens, buffer,
+                           operator_arr[i].type, operator_name);
 
-            AddStringToken(tokens, buffer, operator_arr[i].type, name_ptr);
+            MoveBufferPointer(buffer, pos, (size_t)len);
 
-            MoveBufferPointer(buffer, (size_t)len);
-
-            SkipSpaces(buffer);
+            SkipSpaces(buffer, pos);
             return success;
         }
     }
     return error;
 }
 
-Status ParseIdentifier(Buffer* buffer, TokenArray* tokens)
+Status ParseIdentifier(Buffer* buffer, size_t* pos, TokenArray* tokens)
 {
     assert(buffer);
     assert(buffer->data);
@@ -169,38 +169,36 @@ Status ParseIdentifier(Buffer* buffer, TokenArray* tokens)
 
     while(true)
     {
-        if (isspace(*buffer->data))
+        if (isspace(buffer->data[*pos]))
             break;
 
-        if (   !((len != 0 && isdigit(*buffer->data))
-            || IsSymInIdentifierName(*buffer->data)))
+        if (   !((len != 0 && isdigit(buffer->data[*pos]))
+            || IsSymInIdentifierName(buffer->data[*pos])))
             return error;
 
-        identifier_name[len] = *buffer->data;
+        identifier_name[len] = buffer->data[*pos];
 
         len++;
-        MoveBufferPointer(buffer, 1);
+        MoveBufferPointer(buffer, pos, 1);
     }
 
-    char* name_ptr = strdup(identifier_name);
+    AddStringToken(tokens, buffer, IDENT, identifier_name);
 
-    AddStringToken(tokens, buffer, IDENT, name_ptr);
-
-    SkipSpaces(buffer);
+    SkipSpaces(buffer, pos);
     return success;
 }
 
-int GetSignOfNumber(Buffer* buffer)
+int GetSignOfNumber(Buffer* buffer, size_t* pos)
 {
     assert(buffer);
     assert(buffer->data);
 
-    if (*buffer->data == '-' && isdigit (*(buffer->data + 1)))
+    if (buffer->data[*pos] == '-' && isdigit (*(buffer->data + 1)))
     {
-        MoveBufferPointer(buffer, 1);
+        MoveBufferPointer(buffer, pos, 1);
         return -1;
     }
-    else if (isdigit (*buffer->data) )
+    else if (isdigit (buffer->data[*pos]) )
         return 1;
 
     return 0;
@@ -227,7 +225,7 @@ void AddStringToken(TokenArray* tokens, Buffer* buffer,
     assert(buffer);
 
     tokens->arr[tokens->size].type = type;
-    tokens->arr[tokens->size].lexeme.str.name = name;
+    tokens->arr[tokens->size].lexeme.str.name = strdup(name);
     tokens->arr[tokens->size].lexeme.str.hash = GetHash(name);
     tokens->arr[tokens->size].line = buffer->line;
     tokens->arr[tokens->size].column = buffer->column;
@@ -235,23 +233,23 @@ void AddStringToken(TokenArray* tokens, Buffer* buffer,
     tokens->size++;
 }
 
-void MoveBufferPointer(Buffer* buffer, size_t offset)
+void MoveBufferPointer(Buffer* buffer, size_t* pos,  size_t offset)
 {
     assert(buffer);
     assert(buffer->data);
 
-    buffer->data += offset;
+    pos += offset;
     buffer->column += offset;
 }
 
-void SkipSpaces(Buffer* buffer)
+void SkipSpaces(Buffer* buffer, size_t* pos)
 {
     assert(buffer);
     assert(buffer->data);
 
-    while(isspace(*buffer->data))
+    while(isspace(buffer->data[*pos]))
     {
-        switch(*buffer->data)
+        switch(buffer->data[*pos])
         {
             case ' ': buffer->column++;
                       break;
@@ -266,7 +264,7 @@ void SkipSpaces(Buffer* buffer)
             default: break;
         }
 
-        buffer->data += 1;
+        *pos += 1;
     }
 }
 

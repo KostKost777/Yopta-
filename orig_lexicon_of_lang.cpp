@@ -27,6 +27,7 @@ BaseLexeme operator_arr[NUM_OF_OPERATORS] =
 {OP_BIGGER,          ">",    GetHash(">")},
 {OP_ADD,             "+",    GetHash("+")},
 {OP_SUB,             "-",    GetHash("-")},
+{OP_MUL,             "*",    GetHash("*")},
 {OP_DIV,             "/",    GetHash("/")},
 {OP_POW,             "^",    GetHash("^")},
 {OP_MOD,             "%",    GetHash("%")},

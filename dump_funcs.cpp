@@ -1,0 +1,260 @@
+#include <TXLib.h>
+
+#include "dump_funcs.h"
+#include "lexical_analysis.h"
+#include "tree_funcs.h"
+
+FILE* log_file = NULL;
+const char* log_file_name = "lang_log_file.html";
+
+void CloseLogFile()
+{
+    fclose(log_file);
+    printf("Logfile close");
+}
+
+void OpenLogFile()
+{
+    log_file = fopen(log_file_name, "w");
+
+    if (log_file != NULL)
+        printf("Logfile open \n");
+
+    else
+        perror("Logfile open ERROR \n");
+
+    fprintf(log_file, "<pre>\n");
+}
+
+void TreeDump(Tree* tree)
+{
+    assert(tree);
+
+    fprintf(log_file, "<h3>SIZE: %llu\n</h3>", tree->size);
+
+    static int file_counter = 0;
+    char* image_file_name = GetNewImageFileName(file_counter);
+
+    FILE* graphiz_file = fopen(image_file_name, "w");
+
+    fprintf(graphiz_file, "digraph {\n"
+                          "graph [charset=\"utf-8\"]"
+                          "rankdir = HR;\n"
+                          "splines = true\n");
+
+    PrintBazeNode(graphiz_file, tree);
+
+    if (tree->size > 0) {
+       printf("DUMP_TREE_ROOT: %p\n", tree->root);
+       PrintBazeEdge(graphiz_file, tree);
+       PrintTree(tree->root, graphiz_file);
+    }
+
+    fprintf(graphiz_file, "}");
+
+    fclose(graphiz_file);
+
+    char* dot_cmd = GetNewDotCmd(file_counter);
+
+    system(dot_cmd);
+    free(dot_cmd);
+
+    FillLogFile(image_file_name, tree, file_counter);
+
+    free(image_file_name);
+    file_counter++;
+}
+
+void PrintBazeNode(FILE* graphiz_file,  Tree* tree)
+{
+    assert(tree);
+    assert(graphiz_file);
+
+    fprintf(graphiz_file,
+            "node%p "
+            "[shape = Mrecord, "
+            "style = filled, "
+            "fillcolor = \"#DD7538\", "
+            "color = \"#00000\", "
+            "label = \" {PTR: %p | SIZE: %llu | ROOT: %p} \"]\n",
+            tree, tree, tree->size, tree->root);
+
+}
+
+void PrintBazeEdge(FILE* graphiz_file,  Tree* tree)
+{
+    assert(tree);
+    assert(graphiz_file);
+
+    fprintf(graphiz_file, "node%p -> { node%p } [dir = both]\n",
+                           tree, tree->root);
+}
+
+void PrintTree(Node* node, FILE* graphiz_file)
+{
+    assert(node);
+    assert(graphiz_file);
+
+    PrintGraphizNode(graphiz_file, node);
+    PrintGraphizEdge(graphiz_file, node);
+
+    if (node->left){
+        //printf("PTR: %p   PTR_LEFT: %p\n  ",node,  node->left);
+        PrintTree(node->left, graphiz_file);
+    }
+
+    if (node->right)
+        PrintTree(node->right, graphiz_file);
+
+}
+
+void PrintGraphizEdge(FILE* graphiz_file,  Node* node)
+{
+    assert(node);
+    assert(graphiz_file);
+
+    if (node->left != NULL)
+    {
+        fprintf(graphiz_file,
+                "node%p -> node%p "
+                "[dir = both tailport=sw]\n",
+                node, node->left);
+    }
+
+    if (node->right != NULL)
+    {
+        fprintf(graphiz_file,
+                "node%p -> node%p "
+                "[dir = both tailport=se]\n",
+                node, node->right);
+    }
+}
+
+void PrintGraphizNode(FILE* graphiz_file,  Node* node)
+{
+    assert(node);
+    assert(graphiz_file);
+
+    fprintf(graphiz_file,
+            "node%p "
+            "[shape = Mrecord, "
+            "style = filled, "
+            "fillcolor = \"#8ABAD3\", "
+            "color = \"#00000\", "
+            "label = \" {PARANT_PTR: %p| PTR: %p | "
+            "TYPE: %s",
+            node, node->parent, node, GetNodeTypeName(node));
+
+    if (node->type == NUM)
+        fprintf(graphiz_file, "| VALUE: %d",
+                              node->lexeme.num);
+
+    else
+        fprintf(graphiz_file, "| VALUE: %s",
+                              GetNodeTypeName(node));
+
+    if (node->left != NULL && node->right != NULL)
+        fprintf(graphiz_file,
+                " | {LEFT \\n PTR: %p | "
+                " RIGHT \\n PTR: %p}} \" ]\n",
+                node->left,
+                node->right);
+    else
+        fprintf(graphiz_file, "} \" ]\n");
+
+}
+
+void FillLogFile(char* image_file_name,  Tree* tree, int file_counter)
+{
+    assert(image_file_name != NULL);
+    assert(tree != NULL);
+
+    const int PICTURE_WIDTH = 2000;
+
+    fprintf(log_file, "\n\n<img src=Images\\image%d.svg width=%dpx>\n\n",
+                       file_counter, PICTURE_WIDTH);
+
+    fprintf(log_file, "--------------------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+    fflush(log_file);
+}
+
+const char* GetNodeTypeName(Node* node)
+{
+    assert(node);
+
+    switch(node->type)
+    {
+        case KEY_IF:                return "KEY_IF";
+        case KEY_WHILE:             return "KEY_WHILE";
+        case KEY_RETURN:            return "KEY_RETURN";
+        case KEY_INT:               return "KEY_INT";
+        case KEY_LPAREN:            return "KEY_LPAREN";
+        case KEY_RPAREN:            return "KEY_RPAREN";
+        case KEY_END_OP:            return "KEY_END_OP";
+        case KEY_LBRACE:            return "KEY_LBRACE";
+        case KEY_RBRACE:            return "KEY_RBRACE";
+        case OP_ASSIGNED:           return "OP_ASSIGNED";
+        case OP_EQUAL:              return "OP_EQUAL";
+        case OP_BIGGER:             return "OP_BIGGER";
+        case OP_LESS:               return "OP_LESS";
+        case OP_LESS_OR_EQUAL:      return "OP_LESS_OR_EQUAL";
+        case OP_BIGGER_OR_EQUAL:    return "OP_BIGGER_OR_EQUAL";
+        case OP_NOT_EQUAL:          return "OP_NOT_EQUAL";
+        case OP_MUL:                return "OP_MUL";
+        case OP_ADD:                return "OP_ADD";
+        case OP_SUB:                return "OP_SUB";
+        case OP_DIV:                return "OP_DIV";
+        case OP_POW:                return "OP_POW";
+        case OP_MOD:                return "OP_MOD";
+        case IDENT:                 return "IDENT";
+        case NUM:                   return "NUM";
+        case END:                   return "END";
+
+        default:                    return NULL;
+    }
+    return NULL;
+}
+
+static char* GetNewDotCmd(int file_counter)
+{
+    char str_command[100] = "";
+
+    snprintf(str_command, sizeof(str_command),
+            "dot -Tsvg Images\\image%d.txt -o Images\\image%d.svg",
+             file_counter, file_counter);
+
+    return strdup(str_command);
+}
+
+static char* GetNewImageFileName(int file_counter)
+{
+    char str_file_counter[100] = "";
+
+    snprintf(str_file_counter, sizeof(str_file_counter),
+             "Images\\image%d.txt", file_counter);
+
+    return strdup(str_file_counter);
+}
+
+void PrintTokenArray(TokenArray* tokens)
+{
+    for (size_t i = 0; i < tokens->size; ++i)
+    {
+        fprintf(log_file, "TOKEN[%llu]:\n", i);
+
+        if (tokens->arr[i].type == NUM)
+            fprintf(log_file, "NUM NAME: |%d| ", tokens->arr[i].lexeme.num);
+
+        else
+            fprintf(log_file, "(%d) NAME: |%s| ", tokens->arr[i].type, tokens->arr[i].lexeme.str.name);
+
+        fprintf(log_file, " LINE: %llu COLUMN: %llu",
+                                   tokens->arr[i].line,
+                                   tokens->arr[i].column);
+
+        fprintf(log_file, "\n----------------------------\n\n");
+    }
+}
+
+

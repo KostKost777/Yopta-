@@ -4,7 +4,7 @@
 #include "lexical_analysis.h"
 
 const int NUM_OF_KEYWORDS = 9;
-const int NUM_OF_OPERATORS = 11;
+const int NUM_OF_OPERATORS = 12;
 
 struct BaseLexeme
 {

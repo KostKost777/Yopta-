@@ -47,6 +47,9 @@ enum Type
 
     //Number
     NUM = 23,
+
+    //End
+    END = 24
 };
 
 struct String
@@ -79,19 +82,19 @@ void TokenArrayCtor(TokenArray* tokens);
 
 void TokenArrayDtor(TokenArray* tokens);
 
-Status MakeLexicalAnalysis(Buffer* buffer, TokenArray* tokens);
+Status MakeLexicalAnalysis(Buffer* buffer, size_t* pos, TokenArray* tokens);
 
-void MoveBufferPointer(Buffer* buffer, size_t offset);
+void MoveBufferPointer(Buffer* buffer, size_t* pos, size_t offset);
 
-Status ParseKeyWord(Buffer* buffer, TokenArray* tokens);
+Status ParseKeyWord(Buffer* buffer, size_t* pos, TokenArray* tokens);
 
-Status ParseNumber(Buffer* buffer, TokenArray* tokens);
+Status ParseNumber(Buffer* buffer, size_t* pos, TokenArray* tokens);
 
-Status ParseIdentifier(Buffer* buffer, TokenArray* tokens);
+Status ParseIdentifier(Buffer* buffer, size_t* pos, TokenArray* tokens);
 
-Status ParseOperator(Buffer* buffer, TokenArray* tokens);
+Status ParseOperator(Buffer* buffer, size_t* pos, TokenArray* tokens);
 
-int GetSignOfNumber(Buffer* buffer);
+int GetSignOfNumber(Buffer* buffer, size_t* pos);
 
 void AddNumToken(TokenArray* tokens, Buffer* buffer,
                  Type type, int num);
@@ -99,7 +102,7 @@ void AddNumToken(TokenArray* tokens, Buffer* buffer,
 void AddStringToken(TokenArray* tokens, Buffer* buffer,
                     Type type, char* str);
 
-void SkipSpaces(Buffer* buffer);
+void SkipSpaces(Buffer* buffer, size_t* pos);
 
 bool IsSymInIdentifierName(char sym);
 
