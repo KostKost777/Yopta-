@@ -15,8 +15,9 @@ enum Status
 enum Type
 {
     //Kewords
-
-    KEY_IF = 0,
+    KEY_COMMA = -2,
+    KEY_IF = -1,
+    KEY_ELSE = 0,
     KEY_WHILE = 1,
     KEY_RETURN = 2,
     KEY_INT = 3,
@@ -48,8 +49,11 @@ enum Type
     //Number
     NUM = 23,
 
+    //Param
+    PARAM = 24,
+
     //End
-    END = 24
+    END = 25
 };
 
 struct String

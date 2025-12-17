@@ -20,13 +20,18 @@ Status MakeSyntacticAnalysis(Tree* tree, TokenArray* tokens)
 
 Node* GetGrammer(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 {
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
     fprintf(log_file, "<strong>Вызов GetGeneral</strong>\n");
+    fflush(log_file);
 
     node = GetOperator(tokens, pos, tree, node);
 
     if (tokens->arr[*pos].type != END)
     {
-        fprintf(log_file, "<strong>TokenArray во время ошибки: </strong>\n");
+        fprintf(log_file, "<strong>Ошибочный токен: </strong>\n");
         PrintTokenArray(tokens, *pos);
     }
 
@@ -35,34 +40,238 @@ Node* GetGrammer(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 
 Node* GetOperator(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 {
-    while(true)
-    {
-        Node* node_left = GetWord(tokens, pos, tree, node);
-        if (node_left == NULL) break;
+    assert(tree);
+    assert(tokens);
+    assert(pos);
 
-        if (tokens->arr[*pos].type != OP_ASSIGNED) break;
-        Token assigned_token = tokens->arr[*pos];
-        *pos += 1;
+    fprintf(log_file, "<strong>Вызов GetOperator</strong>\n");
+    fflush(log_file);
 
-        Node* node_right = GetAddSubOp(tokens, pos, tree, node);
-        if (node_right == NULL) break;
+    node = GetAssignedOp(tokens, pos, tree, node);
+    if (node != NULL)
+        return node;
 
-        if (tokens->arr[*pos].type != KEY_END_OP) break;
-        Token end_token = tokens->arr[*pos];
-        *pos += 1;
+    node = GetIfOp(tokens, pos, tree, node);
+    if (node != NULL)
+        return node;
 
-        node = NewNode(end_token,
-                       NewNode(assigned_token, node_left, node_right, tree),
-                       GetOperator(tokens, pos, tree, node),
-                       tree);
-    }
+    node = GetWhileOp(tokens, pos, tree, node);
+    if (node != NULL)
+        return node;
 
     return node;
 }
 
+Node* GetWhileOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
+{
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
+    fprintf(log_file, "<strong>Вызов GetWhileOp</strong>\n");
+    fflush(log_file);
+
+    if (tokens->arr[*pos].type != KEY_WHILE) return NULL;
+    Token while_token = tokens->arr[*pos];
+    *pos += 1;
+
+    if (tokens->arr[*pos].type != KEY_LPAREN) return NULL;
+    *pos += 1;
+
+    Node* node_left = GetAddSubOp(tokens, pos, tree, node);
+    if (node_left == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != KEY_RPAREN) return NULL;
+    *pos += 1;
+
+    if (tokens->arr[*pos].type != KEY_LBRACE) return NULL;
+    *pos += 1;
+
+    Node* node_right = GetOperator(tokens, pos, tree, node);
+    if (node_right == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != KEY_RBRACE) return NULL;
+    *pos += 1;
+
+    return NewNode(GetSeparateToken(KEY_END_OP),
+                   NewNode(while_token,
+                        node_left,
+                        node_right,
+                        tree),
+                    GetOperator(tokens, pos, tree, node),
+                    tree);
+}
+
+Node* GetIfOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
+{
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
+    fprintf(log_file, "<strong>Вызов GetIfOp</strong>\n");
+    fflush(log_file);
+
+    if (tokens->arr[*pos].type != KEY_IF) return NULL;
+    Token if_token = tokens->arr[*pos];
+    *pos += 1;
+
+    if (tokens->arr[*pos].type != KEY_LPAREN) return NULL;
+    *pos += 1;
+
+    Node* node_condition = GetAddSubOp(tokens, pos, tree, node);
+    if (node_condition == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != KEY_RPAREN) return NULL;
+    *pos += 1;
+
+    if (tokens->arr[*pos].type != KEY_LBRACE) return NULL;
+    *pos += 1;
+
+    Node* node_action = GetOperator(tokens, pos, tree, node);
+    if (node_action == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != KEY_RBRACE) return NULL;
+    *pos += 1;
+
+    Node* node_else = GetElseOp(tokens, pos, tree, node, node_action);
+
+    if (node_else == NULL)
+        node_else = node_action;
+
+    return NewNode(GetSeparateToken(KEY_END_OP),
+                   NewNode(if_token,
+                            node_condition,
+                            node_else,
+                            tree),
+                    GetOperator(tokens, pos, tree, node),
+                    tree);
+}
+
+Node* GetElseOp(TokenArray* tokens, size_t* pos, Tree* tree,
+                Node* node, Node* node_action)
+{
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+    assert(node_action);
+
+    fprintf(log_file, "<strong>Вызов GetElseOp</strong>\n");
+    fflush(log_file);
+
+    if (tokens->arr[*pos].type != KEY_ELSE) return NULL;
+    Token else_token = tokens->arr[*pos];
+    *pos += 1;
+
+    if (tokens->arr[*pos].type != KEY_LBRACE) return NULL;
+    *pos += 1;
+
+    Node* node_left = GetOperator(tokens, pos, tree, node);
+    if (node_left == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != KEY_RBRACE) return NULL;
+    *pos += 1;
+
+    return NewNode(else_token,
+                   node_action,
+                   node_left,
+                   tree);
+}
+
+Node* GetAssignedOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
+{
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
+    fprintf(log_file, "<strong>Вызов GetAssignedOp</strong>\n");
+    fflush(log_file);
+
+    Node* node_left = GetWord(tokens, pos, tree, node);
+    if (node_left == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != OP_ASSIGNED) return NULL;
+    Token assigned_token = tokens->arr[*pos];
+    *pos += 1;
+
+    Node* node_right = GetAddSubOp(tokens, pos, tree, node);
+    if (node_right == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != KEY_END_OP) return NULL;
+    *pos += 1;
+
+    return  NewNode(GetSeparateToken(KEY_END_OP),
+                    NewNode(assigned_token, node_left, node_right, tree),
+                    GetOperator(tokens, pos, tree, node),
+                    tree);
+}
+
+Node* GetFunc(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
+{
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
+    fprintf(log_file, "<strong>Вызов GetFuncOp</strong>\n");
+    fflush(log_file);
+
+    Node* node_left = GetIdentifier(tokens, pos, tree);
+
+    if (node_left == NULL || tokens->arr[*pos + 1].type != KEY_LPAREN) return NULL;
+    Token ident_token = tokens->arr[*pos];
+    *pos += 2;
+
+    Node* node_args = GetFuncArgs(tokens, pos, tree, node);
+    if (node_args == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != KEY_RPAREN) return NULL;
+    *pos += 1;
+
+    return NewNode(ident_token,
+                   node_args,
+                   NULL,
+                   tree);
+}
+
+Node* GetFuncArgs(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
+{
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
+    fprintf(log_file, "<strong>Вызов GetFuncArgs</strong>\n");
+
+    Node* node_right = GetAddSubOp(tokens, pos, tree, node);
+
+    if (node_right == NULL)
+    {
+        printf("H1\n");
+        return NULL;
+    }
+
+    if (   tokens->arr[*pos].type != KEY_RPAREN
+        && tokens->arr[*pos].type != KEY_COMMA)
+    {
+        printf("H2\n");
+        return NULL;
+    }
+
+    if (tokens->arr[*pos].type == KEY_COMMA)
+        *pos += 1;
+
+    return NewNode(GetSeparateToken(PARAM),
+                   GetFuncArgs(tokens, pos, tree, node),
+                   node_right,
+                   tree);
+}
+
 Node* GetAddSubOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 {
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
     fprintf(log_file, "<strong>Вызов GetAddSubOp</strong>\n");
+    fflush(log_file);
 
     node = GetMulDivModOp(tokens, pos, tree, node);
 
@@ -70,6 +279,7 @@ Node* GetAddSubOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
           || tokens->arr[*pos].type == OP_SUB)
     {
         fprintf(log_file, "<strong>Обнаружил</strong>\n\n");
+        fflush(log_file);
 
         Token op = tokens->arr[*pos];
 
@@ -85,7 +295,12 @@ Node* GetAddSubOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 Node* GetMulDivModOp(TokenArray* tokens, size_t* pos,
                      Tree* tree, Node* node)
 {
-    fprintf(log_file, "<strong>ВызовGetMulDivModOp</strong>\n");
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
+    fprintf(log_file, "<strong>Вызов GetMulDivModOp</strong>\n");
+    fflush(log_file);
 
     node = GetPowOp(tokens, pos, tree, node);
 
@@ -94,6 +309,7 @@ Node* GetMulDivModOp(TokenArray* tokens, size_t* pos,
            || tokens->arr[*pos].type == OP_MOD)
     {
         fprintf(log_file, "<strong>Обнаружил </strong>\n\n");
+        fflush(log_file);
 
         Token op = tokens->arr[*pos];
 
@@ -108,7 +324,12 @@ Node* GetMulDivModOp(TokenArray* tokens, size_t* pos,
 
 Node* GetPowOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 {
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
     fprintf(log_file, "<strong>Вызов GetPowOp</strong>\n");
+    fflush(log_file);
 
     node = GetMostPreority(tokens, pos, tree, node);
 
@@ -128,11 +349,24 @@ Node* GetPowOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 Node* GetMostPreority(TokenArray* tokens, size_t* pos,
                       Tree* tree, Node* node)
 {
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
     fprintf(log_file, "<strong>Вызов GetMostPreority</strong>\n");
+    fflush(log_file);
+
+    node = GetFunc(tokens, pos, tree, node);
+    if (node != NULL)
+    {
+        fprintf(log_file, "<strong>Нашел вызов функции\n\n");
+        return node;
+    }
 
     if (tokens->arr[*pos].type == KEY_LPAREN)
     {
         fprintf(log_file, "<strong>Обнаружил\"(\": </strong>\n\n");
+        fflush(log_file);
         *pos += 1;
 
         node = GetAddSubOp(tokens, pos, tree, node);
@@ -167,6 +401,10 @@ Node* GetMostPreority(TokenArray* tokens, size_t* pos,
 
 Node* GetNumber(TokenArray* tokens, size_t* pos, Tree* tree)
 {
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
     fprintf(log_file, "<strong>Вызов GetNumber</strong>\n");
 
     if (tokens->arr[*pos].type == NUM)
@@ -180,6 +418,10 @@ Node* GetNumber(TokenArray* tokens, size_t* pos, Tree* tree)
 
 Node* GetWord(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 {
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
     fprintf(log_file, "<strong>Вызов GetWord</strong>\n");
 
 //     node = GetFunction(tokens, pos, tree, node);
@@ -196,6 +438,7 @@ Node* GetWord(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
     {
         fprintf(log_file, "<strong>Нашел индификатор</strong>\n\n");
         *pos += 1;
+        PrintTokenArray(tokens, *pos);
         return node;
     }
 
@@ -204,7 +447,24 @@ Node* GetWord(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 
 Node* GetIdentifier(TokenArray* tokens, size_t* pos, Tree* tree)
 {
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
     fprintf(log_file, "<strong>Вызов GetIdentifier</strong>\n");
+
+    if (tokens->arr[*pos].type == KEY_INT && tokens->arr[*pos + 1].type == IDENT)
+    {
+        fprintf(log_file, "<strong>Обнаружил инициализацию переменной</strong>\n\n");
+        *pos += 1;
+        return NewNode(tokens->arr[*pos - 1],
+                       NewNode(tokens->arr[*pos],
+                               NULL,
+                               NULL,
+                               tree),
+                       NULL,
+                       tree);
+    }
 
     if (tokens->arr[*pos].type == IDENT)
     {
@@ -213,4 +473,10 @@ Node* GetIdentifier(TokenArray* tokens, size_t* pos, Tree* tree)
     }
 
     return NULL;
+}
+
+Token GetSeparateToken(Type type)
+{
+    Token separate_token = {type, 0, 0, 0};
+    return separate_token;
 }

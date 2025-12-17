@@ -187,6 +187,7 @@ const char* GetNodeTypeName(Node* node)
     switch(node->type)
     {
         case KEY_IF:                return "KEY_IF";
+        case KEY_ELSE:              return "KEY_ELSE";
         case KEY_WHILE:             return "KEY_WHILE";
         case KEY_RETURN:            return "KEY_RETURN";
         case KEY_INT:               return "KEY_INT";
@@ -211,6 +212,8 @@ const char* GetNodeTypeName(Node* node)
         case IDENT:                 return "IDENT";
         case NUM:                   return "NUM";
         case END:                   return "END";
+        case PARAM:                 return "PARAM";
+        case KEY_COMMA:             return "KEY_COMMA";
 
         default:                    return NULL;
     }
@@ -262,7 +265,7 @@ void PrintTokenArray(TokenArray* tokens, size_t begin_pos)
 
 char* ConvertEncoding(char* win1251)
 {
-    assert(win1251);
+    if (win1251 == NULL) return "";
 
     size_t win1251_size = strlen(win1251);
     size_t utf8_size = 0;

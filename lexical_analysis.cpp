@@ -69,7 +69,7 @@ Status MakeLexicalAnalysis(Buffer* buffer, size_t* pos, TokenArray* tokens)
         }
     }
 
-    AddStringToken(tokens, buffer, END, buffer->data);
+    AddStringToken(tokens, buffer, END, buffer->data + *pos);
 
     return success;
 }
@@ -179,18 +179,16 @@ Status ParseIdentifier(Buffer* buffer, size_t* pos, TokenArray* tokens)
 
     while(true)
     {
-        if (isspace(buffer->data[*pos]))
-            break;
-
         if (   !((len != 0 && isdigit(buffer->data[*pos]))
-            || IsSymInIdentifierName(buffer->data[*pos])))
-            return error;
+            || IsSymInIdentifierName(buffer->data[*pos]))
+            || isspace(buffer->data[*pos]))
+            break;
 
         identifier_name[len] = buffer->data[*pos];
 
         len++;
         MoveBufferPointer(buffer, pos, 1);
-        printf("ABOBA: %llu\n", *pos);
+        printf("ABOBA: %s\n", identifier_name);
     }
 
     AddStringToken(tokens, buffer, IDENT, identifier_name);

@@ -6,8 +6,9 @@
 
 BaseLexeme keywords_arr[NUM_OF_KEYWORDS] =
 {
-{KEY_IF,        "внатуре",  GetHash("внатуре")},    //if
-{KEY_WHILE,     "потрещим", GetHash("потрещим")},  //while
+{KEY_IF,        "вилкойвглаз",  GetHash("вилкойвглаз")},    //if
+{KEY_ELSE,      "иливжопураз",  GetHash("иливжопураз")},    //else
+{KEY_WHILE,     "потрещим", GetHash("потрещим")},           //while
 {KEY_RETURN,    "шухер",    GetHash("шухер")},        //return
 {KEY_INT,       "йопта",    GetHash("йопта")},        //int
 {KEY_LPAREN,    "гыы",      GetHash("гыы")},          //(
@@ -15,6 +16,7 @@ BaseLexeme keywords_arr[NUM_OF_KEYWORDS] =
 {KEY_END_OP,    "наx",      GetHash("нах")},        //;
 {KEY_LBRACE,    "гоп",      GetHash("гоп")},         // {
 {KEY_RBRACE,    "стоп",     GetHash("стоп")},       // }
+{KEY_COMMA,     ",",        GetHash(",")}           // ,
 };
 
 BaseLexeme operator_arr[NUM_OF_OPERATORS] =

@@ -26,6 +26,19 @@ Node* GetGrammer(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
 
 Node* GetOperator(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
 
+Node* GetWhileOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
 
+Node* GetAssignedOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
+
+Node* GetIfOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
+
+Token GetSeparateToken(Type type);
+
+Node* GetFuncArgs(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
+
+Node* GetFunc(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
+
+Node* GetElseOp(TokenArray* tokens, size_t* pos, Tree* tree,
+                Node* node, Node* node_action);
 
 #endif
