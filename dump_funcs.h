@@ -31,6 +31,8 @@ void PrintTree(Node* node, FILE* graphiz_file);
 
 char* ConvertEncoding(char* win1251);
 
+const char* GetNodeColor(Node* node);
+
 void CloseLogFile();
 void OpenLogFile();
 

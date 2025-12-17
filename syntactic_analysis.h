@@ -38,6 +38,12 @@ Node* GetFuncArgs(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
 
 Node* GetFunc(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
 
+Node* GetInitOfFunc(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
+
+Node* GetArgsOfInitFunc(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
+
+Node* GetReturnOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
+
 Node* GetElseOp(TokenArray* tokens, size_t* pos, Tree* tree,
                 Node* node, Node* node_action);
 

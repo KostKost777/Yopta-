@@ -23,7 +23,7 @@ enum Type
     KEY_INT = 3,
     KEY_LPAREN = 4,
     KEY_RPAREN = 5,
-    KEY_END_OP = 6,
+    KEY_SEMICOLON = 6,
     KEY_LBRACE = 7,
     KEY_RBRACE = 8,
 
@@ -109,5 +109,7 @@ void AddStringToken(TokenArray* tokens, Buffer* buffer,
 void SkipSpaces(Buffer* buffer, size_t* pos);
 
 bool IsSymInIdentifierName(char sym);
+
+void ReadWord(Buffer* buffer, size_t pos, char* word, size_t* len);
 
 #endif

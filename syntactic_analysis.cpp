@@ -27,7 +27,7 @@ Node* GetGrammer(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
     fprintf(log_file, "<strong>ֲûחמג GetGeneral</strong>\n");
     fflush(log_file);
 
-    node = GetOperator(tokens, pos, tree, node);
+    node = GetInitOfFunc(tokens, pos, tree, node);
 
     if (tokens->arr[*pos].type != END)
     {
@@ -38,6 +38,84 @@ Node* GetGrammer(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
     return node;
 }
 
+Node* GetInitOfFunc(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
+{
+    fprintf(log_file, "<strong>ֲûחמג GetInitOfFunc</strong>\n");
+    fflush(log_file);
+
+    if (tokens->arr[*pos].type != KEY_INT)
+        return GetOperator(tokens, pos, tree, node);
+    *pos += 1;
+
+    Node* node_left = GetIdentifier(tokens, pos, tree);
+
+    if (node_left == NULL || tokens->arr[*pos + 1].type != KEY_LPAREN)
+    {
+        *pos -= 1;
+        return GetOperator(tokens, pos, tree, node);
+    }
+
+    Token ident_token = tokens->arr[*pos];
+    *pos += 2;
+
+    Node* node_args = GetArgsOfInitFunc(tokens, pos, tree, node);
+
+    if (tokens->arr[*pos].type != KEY_RPAREN)
+        return NULL;
+    *pos += 1;
+
+    if (tokens->arr[*pos].type != KEY_LBRACE)
+        return NULL;
+    *pos += 1;
+
+    Node* node_right = GetOperator(tokens, pos, tree, node);
+    if (node_right == NULL)
+        return NULL;
+
+    if (tokens->arr[*pos].type != KEY_RBRACE)
+        return NULL;
+    *pos += 1;
+
+    printf("H3\n");
+    return  NewNode(GetSeparateToken(KEY_RBRACE),
+                    NewNode(ident_token,
+                            node_args,
+                            node_right,
+                            tree),
+                    GetInitOfFunc(tokens, pos, tree, node),
+                    tree);
+}
+
+Node* GetArgsOfInitFunc(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
+{
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
+    fprintf(log_file, "<strong>ֲûחמג GetArgsOfInitFunc</strong>\n");
+
+    if (tokens->arr[*pos].type != KEY_INT) return NULL;
+    Token init_token = tokens->arr[*pos];
+    *pos += 1;
+
+    Node* node_right = GetIdentifier(tokens, pos, tree);
+
+    if (node_right == NULL)  return NULL;
+    *pos += 1;
+
+    if (   tokens->arr[*pos].type != KEY_RPAREN
+        && tokens->arr[*pos].type != KEY_COMMA)
+        return NULL;
+
+    if (tokens->arr[*pos].type == KEY_COMMA)
+        *pos += 1;
+
+    return NewNode(init_token,
+                   GetArgsOfInitFunc(tokens, pos, tree, node),
+                   node_right,
+                   tree);
+}
+
 Node* GetOperator(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 {
     assert(tree);
@@ -46,6 +124,10 @@ Node* GetOperator(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 
     fprintf(log_file, "<strong>ֲûחמג GetOperator</strong>\n");
     fflush(log_file);
+
+    node = GetReturnOp(tokens, pos, tree, node);
+    if (node != NULL)
+        return node;
 
     node = GetAssignedOp(tokens, pos, tree, node);
     if (node != NULL)
@@ -93,7 +175,7 @@ Node* GetWhileOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
     if (tokens->arr[*pos].type != KEY_RBRACE) return NULL;
     *pos += 1;
 
-    return NewNode(GetSeparateToken(KEY_END_OP),
+    return NewNode(GetSeparateToken(KEY_SEMICOLON),
                    NewNode(while_token,
                         node_left,
                         node_right,
@@ -138,7 +220,7 @@ Node* GetIfOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
     if (node_else == NULL)
         node_else = node_action;
 
-    return NewNode(GetSeparateToken(KEY_END_OP),
+    return NewNode(GetSeparateToken(KEY_SEMICOLON),
                    NewNode(if_token,
                             node_condition,
                             node_else,
@@ -196,12 +278,37 @@ Node* GetAssignedOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
     Node* node_right = GetAddSubOp(tokens, pos, tree, node);
     if (node_right == NULL) return NULL;
 
-    if (tokens->arr[*pos].type != KEY_END_OP) return NULL;
+    if (tokens->arr[*pos].type != KEY_SEMICOLON) return NULL;
     *pos += 1;
 
-    return  NewNode(GetSeparateToken(KEY_END_OP),
+    return  NewNode(GetSeparateToken(KEY_SEMICOLON),
                     NewNode(assigned_token, node_left, node_right, tree),
                     GetOperator(tokens, pos, tree, node),
+                    tree);
+}
+
+Node* GetReturnOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
+{
+    assert(tree);
+    assert(tokens);
+    assert(pos);
+
+    fprintf(log_file, "<strong>ֲûחמג GetReturnOp</strong>\n");
+    fflush(log_file);
+
+    if (tokens->arr[*pos].type != KEY_RETURN) return NULL;
+    Token return_token = tokens->arr[*pos];
+    *pos += 1;
+
+    Node* node_left = GetAddSubOp(tokens, pos, tree, node);
+    if (node_left == NULL) return NULL;
+
+    if (tokens->arr[*pos].type != KEY_SEMICOLON) return NULL;
+    *pos += 1;
+
+    return  NewNode(GetSeparateToken(KEY_SEMICOLON),
+                    NewNode(return_token, node_left, NULL, tree),
+                    NULL,
                     tree);
 }
 
@@ -216,12 +323,12 @@ Node* GetFunc(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 
     Node* node_left = GetIdentifier(tokens, pos, tree);
 
-    if (node_left == NULL || tokens->arr[*pos + 1].type != KEY_LPAREN) return NULL;
+    if (node_left == NULL || tokens->arr[*pos + 1].type != KEY_LPAREN)
+        return NULL;
     Token ident_token = tokens->arr[*pos];
     *pos += 2;
 
     Node* node_args = GetFuncArgs(tokens, pos, tree, node);
-    if (node_args == NULL) return NULL;
 
     if (tokens->arr[*pos].type != KEY_RPAREN) return NULL;
     *pos += 1;
@@ -242,18 +349,13 @@ Node* GetFuncArgs(TokenArray* tokens, size_t* pos, Tree* tree, Node* node)
 
     Node* node_right = GetAddSubOp(tokens, pos, tree, node);
 
-    if (node_right == NULL)
-    {
-        printf("H1\n");
-        return NULL;
-    }
+    if (node_right == NULL)  return NULL;
+
 
     if (   tokens->arr[*pos].type != KEY_RPAREN
         && tokens->arr[*pos].type != KEY_COMMA)
-    {
-        printf("H2\n");
         return NULL;
-    }
+
 
     if (tokens->arr[*pos].type == KEY_COMMA)
         *pos += 1;

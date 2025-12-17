@@ -140,26 +140,24 @@ void PrintGraphizNode(FILE* graphiz_file,  Node* node)
             "node%p "
             "[shape = Mrecord, "
             "style = filled, "
-            "fillcolor = \"#8ABAD3\", "
+            "fillcolor = \"%s\", "
             "color = \"#00000\", "
-            "label = \" {PARANT_PTR: %p| PTR: %p | "
+            "label = \" {"
             "TYPE: %s",
-            node, node->parent, node, GetNodeTypeName(node));
+            node, GetNodeColor(node), GetNodeTypeName(node));
 
     if (node->type == NUM)
         fprintf(graphiz_file, "| VALUE: %d",
                               node->lexeme.num);
 
-    else
+    else if (node->type == IDENT)
         fprintf(graphiz_file, "| VALUE: %s",
                               ConvertEncoding(node->lexeme.str.name));
 
     if (node->left != NULL && node->right != NULL)
         fprintf(graphiz_file,
-                " | {LEFT \\n PTR: %p | "
-                " RIGHT \\n PTR: %p}} \" ]\n",
-                node->left,
-                node->right);
+                " | {LEFT | "
+                " RIGHT }} \" ]\n");
     else
         fprintf(graphiz_file, "} \" ]\n");
 
@@ -193,9 +191,9 @@ const char* GetNodeTypeName(Node* node)
         case KEY_INT:               return "KEY_INT";
         case KEY_LPAREN:            return "KEY_LPAREN";
         case KEY_RPAREN:            return "KEY_RPAREN";
-        case KEY_END_OP:            return "KEY_END_OP";
-        case KEY_LBRACE:            return "KEY_LBRACE";
-        case KEY_RBRACE:            return "KEY_RBRACE";
+        case KEY_SEMICOLON:         return ";";
+        case KEY_LBRACE:            return "\\{";
+        case KEY_RBRACE:            return "\\}";
         case OP_ASSIGNED:           return "OP_ASSIGNED";
         case OP_EQUAL:              return "OP_EQUAL";
         case OP_BIGGER:             return "OP_BIGGER";
@@ -214,6 +212,46 @@ const char* GetNodeTypeName(Node* node)
         case END:                   return "END";
         case PARAM:                 return "PARAM";
         case KEY_COMMA:             return "KEY_COMMA";
+
+        default:                    return NULL;
+    }
+    return NULL;
+}
+
+const char* GetNodeColor(Node* node)
+{
+    assert(node);
+
+    switch(node->type)
+    {
+        case KEY_IF:                return "#68c3a3ff";
+        case KEY_ELSE:              return "#68c3a3ff";
+        case KEY_WHILE:             return "#313ef4ff";
+        case KEY_RETURN:            return "#ec4343ff";
+        case KEY_INT:               return "#7dc368ff";
+        case KEY_LPAREN:            return "#828282ff";
+        case KEY_RPAREN:            return "#828282ff";
+        case KEY_SEMICOLON:         return "#dd65c9ff";
+        case KEY_LBRACE:            return "#828282ff";
+        case KEY_RBRACE:            return "#c1b74dff";
+        case OP_ASSIGNED:           return "#ffa551ff";
+        case OP_EQUAL:              return "#ffa551ff";
+        case OP_BIGGER:             return "#ffa551ff";
+        case OP_LESS:               return "#ffa551ff";
+        case OP_LESS_OR_EQUAL:      return "#ffa551ff";
+        case OP_BIGGER_OR_EQUAL:    return "#ffa551ff";
+        case OP_NOT_EQUAL:          return "#ffa551ff";
+        case OP_MUL:                return "#ffa551ff";
+        case OP_ADD:                return "#ffa551ff";
+        case OP_SUB:                return "#ffa551ff";
+        case OP_DIV:                return "#ffa551ff";
+        case OP_POW:                return "#ffa551ff";
+        case OP_MOD:                return "#ffa551ff";
+        case IDENT:                 return "#8791ffff";
+        case NUM:                   return "#51ff51ff";
+        case END:                   return "#838383ff";
+        case PARAM:                 return "#dd65c9ff";
+        case KEY_COMMA:             return "#828182ff";
 
         default:                    return NULL;
     }

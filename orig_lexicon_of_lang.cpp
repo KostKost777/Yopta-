@@ -13,7 +13,7 @@ BaseLexeme keywords_arr[NUM_OF_KEYWORDS] =
 {KEY_INT,       "йопта",    GetHash("йопта")},        //int
 {KEY_LPAREN,    "гыы",      GetHash("гыы")},          //(
 {KEY_RPAREN,    "жыы",      GetHash("жыы")},       //)
-{KEY_END_OP,    "наx",      GetHash("нах")},        //;
+{KEY_SEMICOLON, "наx",      GetHash("нах")},        //;
 {KEY_LBRACE,    "гоп",      GetHash("гоп")},         // {
 {KEY_RBRACE,    "стоп",     GetHash("стоп")},       // }
 {KEY_COMMA,     ",",        GetHash(",")}           // ,
