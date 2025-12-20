@@ -4,6 +4,8 @@
 #include "../Frontend/tree_funcs.h"
 #include "../Frontend/dump_funcs.h"
 
+extern const char* asm_file_name;
+
 const int SIZE_OF_FRAME = 5;
 const int MAX_PTR = 1000;
 
@@ -42,6 +44,12 @@ Status ParseAsmLess(Tree* tree, Node* node, Lexeme* func_info);
 bool IsInvalidNum(int mem_ptr);
 
 Status ParseAsmNumber(Tree* tree, Node* node);
+
+void ParseAsmEnd(Tree* tree, Node* node, Lexeme* func_info);
+
+Status ParseAsmAnd(Tree* tree, Node* node, Lexeme* func_info);
+
+Status ParseAsmOr(Tree* tree, Node* node, Lexeme* func_info);
 
 Status ParseAsmADD(Tree* tree, Node* node);
 

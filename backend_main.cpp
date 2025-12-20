@@ -14,6 +14,7 @@ int main (const int argc, const char** argv)
     OpenLogFile();
 
     if (argc > 1) source_file_name = argv[1];
+    if (argc > 2) asm_file_name = argv[2];
 
     Buffer buffer = {};
     GetDataFromFile(&buffer, source_file_name);

@@ -17,6 +17,7 @@ BaseWord basewords_arr[NUM_OF_BASEWORDS] =
 {KEY_LBRACE,         "}",          GetHash("}")},         // }
 {KEY_OUT,            "out",        GetHash("out")},    // out
 {KEY_IN,             "in",         GetHash("in")},  // in
+{KEY_END,             "end",        GetHash("end")},  // end
 {OP_ASSIGNED,        "=",          GetHash("=")},
 {OP_EQUAL,           "==",         GetHash("==")},
 {OP_NOT_EQUAL,       "!=",         GetHash("!=")},
