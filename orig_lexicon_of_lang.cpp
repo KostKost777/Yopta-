@@ -4,40 +4,55 @@
 #include "lexical_analysis.h"
 #include "hash_funcs.h"
 
-BaseLexeme keywords_arr[NUM_OF_KEYWORDS] =
+#define KEY_DECL_(kwd, name)        \
+{ KEY_##kwd, name, GetHash (name) },\
+{ KEY_##kwd, #kwd, GetHash (#kwd) } \
+
+#define OP_DECL_(op, name)            \
+{ OP_##op, name, GetHash (name) },    \
+{ OP_##op, #op, GetHash (#op) }       \
+
+
+BaseLexeme keywords_arr[] =
 {
-{KEY_IF,        "вилкойвглаз",  GetHash("вилкойвглаз")},    //if
-{KEY_ELSE,      "иливжопураз",  GetHash("иливжопураз")},    //else
-{KEY_WHILE,     "потрещим",     GetHash("потрещим")},           //while
-{KEY_RETURN,    "шухер",        GetHash("шухер")},        //return
-{KEY_INT,       "братуха",      GetHash("братуха")},        //int
-{KEY_LPAREN,    "гыы",          GetHash("гыы")},          //(
-{KEY_RPAREN,    "жыы",          GetHash("жыы")},       //)
-{KEY_SEMICOLON, "наx",          GetHash("нах")},        //;
-{KEY_LBRACE,    "гоп",          GetHash("гоп")},         // {
-{KEY_RBRACE,    "стоп",         GetHash("стоп")},       // }
-{KEY_COMMA,     ",",            GetHash(",")},           // ,
-{KEY_OUT,       "малевать",     GetHash("малевать")},    // out
-{KEY_IN,        "вечервхату",   GetHash("вечервхату")},  // in
-{KEY_END,       "откинуться",   GetHash("откинуться")}  // hlt
+KEY_DECL_(IF,        "вилкойвглаз"),    //if
+KEY_DECL_(ELSE,      "иливжопураз"),    //else
+KEY_DECL_(WHILE,     "потрещим"),      //while
+KEY_DECL_(WHILE,     "побазарим"),           //while
+KEY_DECL_(RETURN,    "шухер"),        //return
+KEY_DECL_(INT,       "братуха"),        //int
+KEY_DECL_(INT,       "кент"),        //int
+KEY_DECL_(LPAREN,    "гыы"),        //int
+KEY_DECL_(LPAREN,    "хыы"),        //int
+KEY_DECL_(LPAREN,    "хаха"),        //int
+KEY_DECL_(RPAREN,    "жыы"),        //int
+KEY_DECL_(RPAREN,    "ыыы"),        //int
+KEY_DECL_(SEMICOLON, "нах"),        //int
+KEY_DECL_(LBRACE,    "гоп"),        //int
+KEY_DECL_(RBRACE,    "cтоп"),        //int
+KEY_DECL_(COMMA,     ","),        //int
+KEY_DECL_(OUT,       "малевать"),        //int
+KEY_DECL_(IN,        "вечервхату"),        //int
+KEY_DECL_(DRAW,      "рисовать"),        //int
+KEY_DECL_(END,       "откинуться")        //int
 };
 
-BaseLexeme operator_arr[NUM_OF_OPERATORS] =
+BaseLexeme operator_arr[] =
 {
-{OP_ASSIGNED,        "=",    GetHash("=")},
-{OP_EQUAL,           "==",   GetHash("==")},
-{OP_NOT_EQUAL,       "!=",   GetHash("!=")},
-{OP_LESS_OR_EQUAL,   "<=",   GetHash("<=")},
-{OP_BIGGER_OR_EQUAL, ">=",   GetHash(">=")},
-{OP_LESS,            "<",    GetHash("<")},
-{OP_BIGGER,          ">",    GetHash(">")},
-{OP_OR,              "||",   GetHash("||")},
-{OP_AND,             "&&",   GetHash("&&")},
-{OP_ADD,             "+",    GetHash("+")},
-{OP_SUB,             "-",    GetHash("-")},
-{OP_MUL,             "*",    GetHash("*")},
-{OP_DIV,             "/",    GetHash("/")},
-{OP_POW,             "^",    GetHash("^")},
-{OP_MOD,             "%",    GetHash("%")},
-{OP_SQRT,            "sqrt", GetHash("sqrt")},
+OP_DECL_(ASSIGNED,            "="),
+OP_DECL_(EQUAL,               "=="),
+OP_DECL_(NOT_EQUAL,           "!="),
+OP_DECL_(LESS_OR_EQUAL,      "<="),
+OP_DECL_(BIGGER_OR_EQUAL,     ">="),
+OP_DECL_(LESS,                "<"),
+OP_DECL_(BIGGER,              "<"),
+OP_DECL_(OR,                  "||"),
+OP_DECL_(AND,                 "&&"),
+OP_DECL_(ADD,                 "+"),
+OP_DECL_(SUB,                 "-"),
+OP_DECL_(MUL,                 "*"),
+OP_DECL_(DIV,                 "/"),
+OP_DECL_(POW,                 "^"),
+OP_DECL_(MOD,                 "%"),
+OP_DECL_(SQRT,                "sqrt")
 };

@@ -65,6 +65,8 @@ Status ParseAsmSQRT(Tree* tree, Node* node);
 
 Status ParseAsmPARAM(Tree* tree, Node* node);
 
+void ParseAsmDraw(Tree* tree, Node* node, Lexeme* func_info);
+
 Status ParseAsmOutVar(Tree* tree, Node* node, Lexeme* func_info);
 
 Status ParseAsmInVar(Tree* tree, Node* node, Lexeme* func_info);

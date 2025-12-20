@@ -18,7 +18,7 @@ PowModOp        ::= MostPreority { ['^'] MostPreority}*
 MostPreority    ::= "гыы" AddSubOp "жыы" | Number | Ident | Func | Sqrt
 Sqrt            ::= "sqrt" "гыы" CompareFirstOp "жыы"
 Func            ::= Ident "гыы" FuncArgs "жыы"
-FuncArgs        ::= [Ident] {',' Ident}*
+FuncArgs        ::= Ident ? {',' Ident}*
 Ident           ::= {["a"-"z" "A"-"Z" '_']}*{"a"-"z" "A"-"Z" '_' '0'-'9'}
 Number          ::= {['0'-'9']}
 

@@ -41,6 +41,9 @@ void ParseMain(Tree* tree, Node* node, Lexeme* main)
         node = node->right;
 
     ParseAsmOperator(tree, node, main);
+
+    if (tree->is_draw)
+        fprintf(asm_file, "DRAW\n");
     fprintf(asm_file, "HLT\n\n");
 }
 
@@ -72,6 +75,9 @@ void ParseAsmOperator(Tree* tree, Node* node, Lexeme* func_info)
             ParseAsmEnd(tree, node, func_info);
             return;
         }
+
+        if (node->left->type == KEY_DRAW)
+            ParseAsmDraw(tree, node->left, func_info);
 
         if (node->left->type == OP_ASSIGNED)
             ParseAsmAssigned(tree, node->left, func_info);
@@ -111,6 +117,37 @@ void ParseAsmAssigned(Tree* tree, Node* node, Lexeme* func_info)
     ParseAsmInVar(tree, node->left, func_info);
 }
 
+void ParseAsmDraw(Tree* tree, Node* node, Lexeme* func_info)
+{
+    assert(tree);
+    assert(node);
+    assert(func_info);
+
+    fprintf(log_file, "ֲûחמג ParseAsmDraw\n");
+
+    ParseAsmOutVar(tree, node->left, func_info);
+
+    fprintf(asm_file, "\nPOPREG BX\n");
+    fprintf(asm_file, "PUSH 255\n");
+    fprintf(asm_file, "POPM [BX]\n");
+
+    fprintf(asm_file, "PUSH 1\n");
+    fprintf(asm_file, "PUSHREG BX\n");
+    fprintf(asm_file, "ADD\n");
+    fprintf(asm_file, "POPREG BX\n");
+    fprintf(asm_file, "PUSH 128\n");
+    fprintf(asm_file, "POPM [BX]\n");
+
+    fprintf(asm_file, "PUSH 1\n");
+    fprintf(asm_file, "PUSHREG BX\n");
+    fprintf(asm_file, "ADD\n");
+    fprintf(asm_file, "POPREG BX\n");
+    fprintf(asm_file, "PUSH 255\n");
+    fprintf(asm_file, "POPM [BX]\n");
+
+    tree->is_draw = true;
+}
+
 void ParseAsmEnd(Tree* tree, Node* node, Lexeme* func_info)
 {
     assert(tree);
@@ -118,6 +155,9 @@ void ParseAsmEnd(Tree* tree, Node* node, Lexeme* func_info)
     assert(func_info);
 
     fprintf(log_file, "ֲûחמג ParseAsmEnd\n");
+
+    if (tree->is_draw)
+        fprintf(asm_file, "DRAW\n");
 
     fprintf(asm_file, "HLT\n");
 }
@@ -282,7 +322,6 @@ void PrintNodeInAsmFile(Tree* tree, Node* node, Lexeme* func_info)
     if (ParseAsmEqual(tree, node, func_info) == success) return;
     if (ParseAsmNotEqual(tree, node, func_info) == success) return;
     if (ParseAsmCallFunc(tree, node, func_info) == success) return;
-
 }
 
 Status ParseAsmOr(Tree* tree, Node* node, Lexeme* func_info)
@@ -676,7 +715,7 @@ Status ParseAsmCallFunc(Tree* tree, Node* node, Lexeme* func_info)
     fprintf(log_file, "ֲûחמג ParseAsmCallFunc\n");
 
     Lexeme now_func = node->lexeme;
-    printf("LEXEME: %s\n", node->lexeme.str.name);
+    //printf("LEXEME: %s\n", node->lexeme.str.name);
     size_t index = GetIndexOfFuncInNameTable(tree->name_table, &now_func);
 
     ParseAsmExpression(tree, node->left->right, func_info);

@@ -20,6 +20,7 @@ struct Tree
     int code_err;
     Node* root;
 
+    bool is_draw;
     NameTable* name_table;
 };
 

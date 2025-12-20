@@ -127,24 +127,13 @@ Status ParseKeyWord(Buffer* buffer, size_t* pos, TokenArray* tokens)
 
     if (len < 0) assert(false);
 
-    size_t keyword_hash = GetHash(keyword_name);
+    BaseLexeme* key_word_ptr = FindInKeyWordArr(keyword_name)
 
-    for (int i = 0; i < NUM_OF_KEYWORDS; ++i)
-    {
-        // printf("KEY_WORD: |%s|   MY_KEY_WORD: |%s|\n", keywords_arr[i].name,
-        //                                               keyword_name);
-        if (keywords_arr[i].hash == keyword_hash)
-        {
-            AddStringToken(tokens, buffer, keywords_arr[i].type, keyword_name);
+    if (key_word_ptr == NULL) return error;
 
-            MoveBufferPointer(buffer, pos, (size_t)len);
-
-            SkipSpaces(buffer, pos);
-            return success;
-        }
-    }
-
-    return error;
+    AddStringToken(tokens, buffer, key_word_ptr.type, keyword_name);
+    MoveBufferPointer(buffer, pos, (size_t)len);
+    SkipSpaces(buffer, pos);
 }
 
 Status ParseOperator(Buffer* buffer, size_t* pos, TokenArray* tokens)
@@ -161,23 +150,13 @@ Status ParseOperator(Buffer* buffer, size_t* pos, TokenArray* tokens)
 
     if (len < 0) assert(false);
 
-    size_t operator_hash = GetHash(operator_name);
+    BaseLexeme* op_word_ptr = FindInKeyWordArr(operator_name)
 
-    for (int i = 0; i < NUM_OF_OPERATORS; ++i)
-    {
-        //printf("ORIG: |%s|   MY: |%s|\n", operator_arr[i].name, operator_name);
-        if (operator_arr[i].hash == operator_hash)
-        {
-            AddStringToken(tokens, buffer,
-                           operator_arr[i].type, operator_name);
+    if (op_word_ptr == NULL) return error;
 
-            MoveBufferPointer(buffer, pos, (size_t)len);
-
-            SkipSpaces(buffer, pos);
-            return success;
-        }
-    }
-    return error;
+    AddStringToken(tokens, buffer, op_word_ptr.type, operator_name);
+    MoveBufferPointer(buffer, pos, (size_t)len);
+    SkipSpaces(buffer, pos);
 }
 
 Status ParseIdentifier(Buffer* buffer, size_t* pos, TokenArray* tokens)
@@ -306,3 +285,39 @@ bool IsSymInIdentifierName(char sym)
 //     unsigned char c = (unsigned char) sym;
 //     return c >= 192 || c == 168 || c == 184;
 // }
+
+BaseLexeme* FindInKeyWordArr(char* name, size_t hash)
+{
+    assert(name);
+
+    size_t hash = GetHash(name);
+
+    for (int i = 0; i < NUM_OF_KEYWORDS; ++i)
+    {
+        if (keywords_arr[i].hash == hash &&
+            strcmp(keywords_arr[i].name, name) == 0)
+        {
+            return &keywords_arr[i];
+        }
+    }
+
+    return NULL;
+}
+
+BaseLexeme* FindInOpArr(char* name)
+{
+    assert(name);
+
+    size_t hash = GetHash(name)
+
+    for (int i = 0; i < NUM_OF_OERATORS; ++i)
+    {
+        if (operator_arr[i].hash == hash &&
+            strcmp(operator_arr[i].name, name) == 0)
+        {
+            return &operator_arr[i];
+        }
+    }
+
+    return NULL;
+}

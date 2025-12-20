@@ -1,4 +1,4 @@
-PUSH 10
+PUSH 100
 
 PUSH 0  ;ббнд гмювемхъ оепелеммни |еБЦЕМ_ьОЮКЮ|
 PUSHREG HX 
@@ -6,7 +6,7 @@ ADD
 POPREG GX
 POPM [GX]
 
-PUSH 10
+PUSH 100
 
 PUSH 1  ;ббнд гмювемхъ оепелеммни |еПФЮМ_цМНЛ|
 PUSHREG HX 
@@ -14,7 +14,7 @@ ADD
 POPREG GX
 POPM [GX]
 
-PUSH 2
+PUSH 20
 
 PUSH 2  ;ббнд гмювемхъ оепелеммни |яЕПЕЦЮ_пЮДХСЯ|
 PUSHREG HX 
@@ -87,7 +87,21 @@ ADD
 POPREG GX
 PUSHM [GX]
 
-PUSH 100
+
+PUSH 0  ;бшбнд гмювемхъ оепелеммни |еБЦЕМ_ьОЮКЮ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+
+PUSH 1  ;бшбнд гмювемхъ оепелеммни |еПФЮМ_цМНЛ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+MUL
 
 JB :L_less_0
 PUSH 0
@@ -100,7 +114,21 @@ ADD
 POPREG GX
 PUSHM [GX]
 
-PUSH 100
+
+PUSH 0  ;бшбнд гмювемхъ оепелеммни |еБЦЕМ_ьОЮКЮ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+
+PUSH 1  ;бшбнд гмювемхъ оепелеммни |еПФЮМ_цМНЛ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+MUL
 
 JA :L_bigger_0
 PUSH 1
@@ -172,8 +200,7 @@ PUSHM [GX]
 
 SUB
 MUL
-SUB
-SQVRT
+ADD
 
 PUSH 8  ;ббнд гмювемхъ оепелеммни |юМДПЧУЮ_пЮЯЯРНЪМХЕ|
 PUSHREG HX 
@@ -196,6 +223,14 @@ POPREG GX
 PUSHM [GX]
 
 
+PUSH 2  ;бшбнд гмювемхъ оепелеммни |яЕПЕЦЮ_пЮДХСЯ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+MUL
+
 JB :L_less_1
 PUSH 0
 :L_less_1
@@ -215,6 +250,14 @@ POPREG GX
 PUSHM [GX]
 
 
+PUSH 2  ;бшбнд гмювемхъ оепелеммни |яЕПЕЦЮ_пЮДХСЯ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+MUL
+
 JA :L_bigger_1
 PUSH 1
 :L_bigger_1
@@ -222,7 +265,61 @@ PUSH 1
 
 PUSH 0
 JE :endif_0
-HLT
+
+PUSH 7  ;бшбнд гмювемхъ оепелеммни |яВЕРВХЙ_еПФЮМ_цМНЛ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+
+PUSH 1  ;бшбнд гмювемхъ оепелеммни |еПФЮМ_цМНЛ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+MUL
+
+PUSH 6  ;бшбнд гмювемхъ оепелеммни |яВЕРВХЙ_еБЦЕМ_ьОЮКЮ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+ADD
+PUSH 3
+MUL
+
+PUSH 9  ;ббнд гмювемхъ оепелеммни |лЮЙЯНМ_йННПДХМЮРШ|
+PUSHREG HX 
+ADD
+POPREG GX
+POPM [GX]
+
+
+PUSH 9  ;бшбнд гмювемхъ оепелеммни |лЮЙЯНМ_йННПДХМЮРШ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
+
+POPREG BX
+PUSH 255
+POPM [BX]
+PUSH 1
+PUSHREG BX
+ADD
+POPREG BX
+PUSH 128
+POPM [BX]
+PUSH 1
+PUSHREG BX
+ADD
+POPREG BX
+PUSH 255
+POPM [BX]
 :endif_0
 
 
@@ -248,7 +345,13 @@ ADD
 POPREG GX
 PUSHM [GX]
 
-PUSH 9
+
+PUSH 0  ;бшбнд гмювемхъ оепелеммни |еБЦЕМ_ьОЮКЮ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
 
 JE :E_equal_0
 PUSH 0
@@ -261,7 +364,13 @@ ADD
 POPREG GX
 PUSHM [GX]
 
-PUSH 9
+
+PUSH 0  ;бшбнд гмювемхъ оепелеммни |еБЦЕМ_ьОЮКЮ|
+PUSHREG HX 
+ADD
+POPREG GX
+PUSHM [GX]
+
 
 JNE :E_not_equal_0
 PUSH 1
@@ -320,5 +429,6 @@ JMP :begin_while_0
 
 :endwhile_0
 
+DRAW
 HLT
 

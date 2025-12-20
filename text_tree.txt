@@ -1,0 +1,4 @@
+( ; ( = ( int ( ѕидорассо nil nil ) nil ) ( + ( - ( + ( 12 nil nil ) ( 4 nil nil ) ) ( * ( 5 nil nil ) ( 3 nil nil ) ) ) ( 11 nil nil ) ) ) ( ; ( = ( int ( ≈блан nil nil ) nil ) ( + ( 12 nil nil ) ( / ( 3 nil nil ) ( 2 nil nil ) ) ) ) nil ) ) 
+FUNC    main
+VAR    ѕидорассо
+VAR    ≈блан

@@ -9,6 +9,7 @@ Status TreeCtor(Tree* tree)
 
     tree->size = 0;
     tree->root = NULL;
+    tree->is_draw = false;
 
     tree->name_table = NameTableCtor();
 

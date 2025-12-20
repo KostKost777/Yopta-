@@ -1,0 +1,46 @@
+FLAGS = -g -DDEBUG
+BUILD_DIR = builds/
+
+all: mid
+
+mid: $(BUILD_DIR)parse_tree_from_buffer_funcs.o $(BUILD_DIR)write_tree_in_file_funcs.o $(BUILD_DIR)orig_lexicon_of_lang.o $(BUILD_DIR)middle_end_funcs.o $(BUILD_DIR)op_funcs.o $(BUILD_DIR)name_table_funcs.o $(BUILD_DIR)hash_funcs.o $(BUILD_DIR)basewords_backend.o $(BUILD_DIR)read_from_file_funcs.o $(BUILD_DIR)dump_funcs.o $(BUILD_DIR)middle_end_main.o $(BUILD_DIR)tree_funcs.o
+	g++ $(FLAGS) $^ -o mid
+
+$(BUILD_DIR)write_tree_in_file_funcs.o: ..\Frontend\write_tree_in_file_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)parse_tree_from_buffer_funcs.o: ..\Backend\parse_tree_from_buffer_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)middle_end_main.o: middle_end_main.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)dump_funcs.o: ../Frontend/dump_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)tree_funcs.o: ../Frontend/tree_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)read_from_file_funcs.o: ../Frontend/read_from_file_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)basewords_backend.o: ../Backend/basewords_backend.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)hash_funcs.o: ../Frontend/hash_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)name_table_funcs.o: ../Frontend/name_table_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)op_funcs.o: op_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)middle_end_funcs.o: middle_end_funcs.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+$(BUILD_DIR)orig_lexicon_of_lang.o: ../Frontend/orig_lexicon_of_lang.cpp
+	g++ $(FLAGS) -c $< -o $@
+
+clean:
+	rm -f $(BUILD_DIR)*.o mid

@@ -1,0 +1,6 @@
+( } ( Факториальная ( PARAM nil ( int ( x nil nil ) nil ) ) ( ; ( if ( == ( x nil nil ) ( 1 nil nil ) ) ( ; ( return ( 1 nil nil ) nil ) nil ) ) ( ; ( = ( int ( res nil nil ) nil ) ( Факториальная ( PARAM nil ( - ( x nil nil ) ( 1 nil nil ) ) ) nil ) ) ( ; ( return ( * ( res nil nil ) ( x nil nil ) ) nil ) nil ) ) ) ) ( ; ( = ( int ( x nil nil ) nil ) ( 0 nil nil ) ) ( ; ( in ( x nil nil ) nil ) ( ; ( out ( Факториальная ( PARAM nil ( x nil nil ) ) nil ) nil ) nil ) ) ) )
+FUNC      Факториальная
+VAR       x
+VAR       res
+FUNC      main
+VAR       x

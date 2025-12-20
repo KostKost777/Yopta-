@@ -56,6 +56,8 @@ Node* GetFourthCompareOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node
 
 Node* GetEndOp(TokenArray* tokens, size_t* pos, Tree* tree);
 
+Node* GetDrawOp(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
+
 Node* GetSqrt(TokenArray* tokens, size_t* pos, Tree* tree, Node* node);
 
 Node* GetElseOp(TokenArray* tokens, size_t* pos, Tree* tree,
